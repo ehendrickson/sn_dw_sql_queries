@@ -1,0 +1,6 @@
+-- Sitebuilder
+-- Active Sites
+SELECT s.*
+FROM ngin.sites AS s
+-- Statuses below indicate a site is active.  All others are not conidered active
+WHERE s.status IN ('active', 'construction', 'construction_custom_domain', 'disabled');
