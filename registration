@@ -29,6 +29,9 @@ AND sr.order_id IS NOT NULL
 -- This portion is optional, but restricts the search to the trailing 12 month
 AND sr.`created_at` >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR) 
 AND sr.created_at < CURDATE() 
+-- Current reg active requires an active site
+-- This should be removed to view historical activity (for sites that are now in a non-active status)
+AND sites.status IN ('active', 'construction', 'construction_custom_domain', 'disabled')
 GROUP BY sites.id;
 
 -- Non-Monetary Registraion Survey in previous 12 months
@@ -49,5 +52,7 @@ AND sr.completed = 1
 -- This portion is optional, but restricts the search to the trailing 12 month
 AND sr.`created_at` >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR) 
 AND sr.created_at < CURDATE() 
+-- Current reg active requires an active site
+-- This should be removed to view historical activity (for sites that are now in a non-active status)
+AND sites.status IN ('active', 'construction', 'construction_custom_domain', 'disabled')
 GROUP BY sites.id;
-			
