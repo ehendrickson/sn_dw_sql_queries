@@ -1,0 +1,12 @@
+-- Tourney Active
+-- Defined as any team use in trailing 12 months
+
+		SELECT DISTINCT org.id AS org_id
+			, COUNT(ti._id) AS tourney_team_use_ttm_count
+		FROM stat_ngin.team_instances AS ti
+		INNER JOIN stat_ngin.tournaments AS t
+			ON t._id = ti.tournament_id
+		INNER JOIN boss_service.organizations AS org
+			ON t.org = org.id
+		WHERE ti.created_at >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR) AND ti.created_at < CURDATE() 
+		GROUP BY org.id;
