@@ -1,0 +1,19 @@
+-- Verify count in previous 12 months
+SELECT DISTINCT sites.id
+	, COUNT(sr.id) AS verify_ttm_count
+FROM ngin.background_screens AS bs
+-- Screen must have at least one complete result to make it count
+INNER JOIN ngin.survey_results AS sr
+	ON bs.survey_result_id = sr.id
+		-- Result must be completed
+		AND sr.completed = 1
+INNER JOIN ngin.surveys AS s
+	ON sr.survey_id = s.id
+INNER JOIN ngin.sites AS sites
+	ON s.site_id = sites.id
+WHERE
+	-- Below restricts search to trailing 12 months
+	bs.created_at >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR) AND bs.created_at < CURDATE()
+	-- Must have an active site to be a valid verify customer. Remove this to view historical data
+	AND sites.STATUS IN ('active', 'construction', 'construction_custom_domain', 'disabled')
+GROUP BY sites.id;
