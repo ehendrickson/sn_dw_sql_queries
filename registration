@@ -1,0 +1,53 @@
+-- Registration
+-- Monetary Registraion Survey in previous 12 months
+SELECT DISTINCT sites.id
+	, COUNT(s.id) AS monetary_reg_ttm_count
+FROM ngin.surveys AS s
+INNER JOIN ngin.survey_results AS sr
+	ON s.id = sr.`survey_id`
+INNER JOIN ngin.`order_transactions` AS trans
+	ON sr.order_id = trans.order_id
+INNER JOIN ngin.`merchant_accounts` AS ma
+	ON trans.`merchant_account_id` = ma.id
+INNER JOIN ngin.sites AS sites
+	ON s.site_id = sites.id
+WHERE 
+-- Indicates monetary survey
+s.`monetary` = 1 
+-- All types but site_member are registration
+AND s.`survey_type` <> 'site_member' 
+-- There must be at least one complete survey_result to count as a valid registration
+AND sr.completed = 1
+-- Transaction must be successful  
+AND trans.success = 1 
+-- Transaction must not be a test
+AND trans.test = 0 
+-- Rate and Fee of 0 would indicate no revenue
+AND (trans.tst_rate > 0 OR trans.tst_fee > 0)
+-- A survey result must be associate with an order
+AND sr.order_id IS NOT NULL 
+-- This portion is optional, but restricts the search to the trailing 12 month
+AND sr.`created_at` >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR) 
+AND sr.created_at < CURDATE() 
+GROUP BY sites.id;
+
+-- Non-Monetary Registraion Survey in previous 12 months
+SELECT DISTINCT sites.id
+	, COUNT(s.id) AS non_monetary_reg_ttm_count
+FROM ngin.surveys AS s
+INNER JOIN ngin.survey_results AS sr
+	ON s.id = sr.`survey_id`
+INNER JOIN ngin.sites AS sites
+	ON s.site_id = sites.id
+WHERE 
+-- Indicates monetary survey
+s.`monetary` = 0
+-- All types but site_member are registration
+AND s.`survey_type` <> 'site_member' 
+-- There must be at least one complete survey_result to count as a valid registration
+AND sr.completed = 1
+-- This portion is optional, but restricts the search to the trailing 12 month
+AND sr.`created_at` >= DATE_SUB(CURDATE(), INTERVAL 1 YEAR) 
+AND sr.created_at < CURDATE() 
+GROUP BY sites.id;
+			
